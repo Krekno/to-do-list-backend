@@ -9,6 +9,4 @@ import lombok.Setter;
 @AllArgsConstructor
 public class TaskDto {
     private String title;
-    private String description;
-    private Boolean isCompleted;
 }

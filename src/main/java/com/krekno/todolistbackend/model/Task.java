@@ -20,11 +20,7 @@ public class Task {
     private String title;
 
     @Column(nullable = false)
-    private String description;
-
-    @Column(nullable = false)
     private Boolean isCompleted;
 
-    @ManyToOne
-    private User user;
+    private Long user_id;
 }

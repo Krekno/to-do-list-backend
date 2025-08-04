@@ -6,8 +6,8 @@ import com.krekno.todolistbackend.model.dto.TaskDto;
 import com.krekno.todolistbackend.repository.TaskRepository;
 import com.krekno.todolistbackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public class TaskController {
 
     @GetMapping
     public ResponseEntity<List<Task>> getAllTasks(Authentication authentication) {
-        String email = authentication.name();
+        String email = authentication.getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -44,11 +44,14 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> addTask(@RequestBody TaskDto taskDto) {
+    public ResponseEntity<Task> addTask(@RequestBody TaskDto taskDto, Authentication authentication) {
+
+        User user = userRepository.findByEmail(authentication.getName()).orElseThrow();
+
         Task task = Task.builder()
                 .title(taskDto.getTitle())
-                .description(taskDto.getDescription())
                 .isCompleted(false)
+                .user_id(user.getId())
                 .build();
 
         taskRepository.save(task);
@@ -61,8 +64,6 @@ public class TaskController {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
         task.setTitle(taskDto.getTitle());
-        task.setDescription(taskDto.getDescription());
-        task.setIsCompleted(taskDto.getIsCompleted());
         taskRepository.save(task);
 
         return ResponseEntity.ok(task);
@@ -80,6 +81,7 @@ public class TaskController {
                 .orElseThrow(() -> new RuntimeException("Task not found"));
 
         task.setIsCompleted(!task.getIsCompleted());
+        taskRepository.save(task);
 
         return ResponseEntity.ok(task);
     }
